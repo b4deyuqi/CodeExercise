@@ -1,0 +1,2 @@
+# 忽略 leetcode 文件夹及其子文件夹中的所有 .exe 文件
+/leetcode/**/*.exe
