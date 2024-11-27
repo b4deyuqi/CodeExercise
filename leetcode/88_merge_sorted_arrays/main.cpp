@@ -54,16 +54,46 @@ void merge(vector<int> &nums1, int m, vector<int> &nums2, int n)
 {
     /* 双尾指针遍历 Time: O(m+n) Space: O(1) */
     int i = m - 1, j = n - 1;
+    int tail = i + j + 1;
     vector<int> sorted;
     for (; i >= 0 || j >= 0;)
     {
-        int tail = i + j + 1;
+        if (i == -1 && j != -1)
+            nums1[j--] = nums2[j--];
+        // nums2全填进去后，nums1剩余部分有序
+        else if (j == -1)
+            break;
+
+        else if (nums1[i] > nums2[j])
+        {
+            // nums1[i + j + 1] = nums1[i--];
+            // 不要用复合运算
+            nums1[i + j + 1] = nums1[i];
+            i--;
+        }
+
+        else if (nums1[i] <= nums2[j])
+        {
+            nums1[i + j + 1] = nums2[j];
+            j--;
+        }
+    }
+}
+
+void merge4(vector<int> &nums1, int m, vector<int> &nums2, int n)
+{
+    /* 双尾指针遍历 Time: O(m+n) Space: O(1) */
+    int i = m - 1, j = n - 1;
+    int tail = i + j + 1;
+    vector<int> sorted;
+    for (; i >= 0 || j >= 0;)
+    {
+
         if (i == -1)
             nums1[tail--] = nums2[j--];
         // nums2全填进去后，nums1剩余部分有序
         else if (j == -1)
             break;
-        //     nums1[i + j + 1] = nums1[i--];
         else if (nums1[i] > nums2[j])
             nums1[tail--] = nums1[i--];
         else if (nums1[i] <= nums2[j])
