@@ -1,6 +1,6 @@
 [toc]
 
-## 88 merge sorted arrays
+## 88 合并有序数组
 
 [88. 合并两个有序数组](https://leetcode.cn/problems/merge-sorted-array/)
 
@@ -67,7 +67,7 @@
 
 4）`nums1[i + j + 1] = nums1[i--]` 左边的i是自减后的，需要另设一个变量；不要等号左右同属出现 `i++`，`i--`。
 
-### 4. 题解(ACM)
+### 4. 题解
 
 ```cpp
 void merge1(vector<int> &nums1, int m, vector<int> &nums2, int n)
@@ -141,7 +141,7 @@ void merge(vector<int> &nums1, int m, vector<int> &nums2, int n)
 ```
 
 
-## 27 reove elements
+## 27 移除元素
 
 [27. 移除元素](https://leetcode.cn/problems/remove-element/)
 
@@ -280,4 +280,60 @@ int removeElement(vector<int> &nums, int val)
 ```
 
 
-## 26
+## 26 删除有序数组的重复项
+
+[26. 删除有序数组中的重复项](https://leetcode.cn/problems/remove-duplicates-from-sorted-array/)
+
+### 0. 类型
+
+数组。
+
+### 1. 题目描述
+
+
+
+### 2. 思路
+
+双指针。由于给定的数组 `nums` 是有序的，因此对于任意 `i<j`，如果 `nums[i]=nums[j]`，则对任意 ` i≤k≤j`，必有 ` nums[i]=nums[k]=nums[j]`，即相等的元素在数组中的下标一定是连续的。利用数组有序的特点，可以通过双指针的方法删除重复元素。
+
+slow指向上一个非重复元素，fast指向下一个非重复元素。
+
+当fast与slow的元素不一样，说明找到了新出现的非重复元素。
+
+则将slow++，指向下一个可覆盖位置。
+
+赋值。
+
+slow++，记录新的元素，fast++继续寻找下一个不重复的。
+
+
+### 3. 易错点
+
+暂无。
+
+### 4. 题解
+
+```cpp
+int removeDuplicates(vector<int> &nums)
+{
+    int slow = 0, fast = 1;
+    while (fast < nums.size())
+    {
+        // fast 去寻找下一个出现的新元素
+        // slow 指向当前非重复的最后一个元素
+        if (nums[slow] != nums[fast])
+        {
+            // 当找到新的元素
+            slow++;                  // 指向下一个可覆盖的位置
+            nums[slow] = nums[fast]; // 覆盖
+            fast++;                  // 寻找下一个和当前不重复的元素
+        }
+        else if (nums[slow] == nums[fast])
+        {
+            // 重复，继续往后找
+            fast++;
+        }
+    }
+    return slow + 1;
+}
+```
