@@ -3,9 +3,9 @@
 using namespace std;
 vector<vector<int>> threeSum(vector<int> &nums)
 {
-    /* 排序 + 一层for循环 + 双指针 Time: O(N2) Space: O(logN)*/
-    /* for循环 从左到右遍历第一个元素*/
-    /* 对于每一个元素，使用相向双指针查找有没有符合要求的另两个元素*/
+    /* 排序 + 一层for循环 + 双指针 Time: O(N2) Space: O(logN) */
+    /* for循环 从左到右遍历第一个元素 */
+    /* 对于每一个元素，使用相向双指针查找有没有符合要求的另两个元素 */
     // 首先进行排序
     sort(nums.begin(), nums.end());
     vector<vector<int>> ans;
