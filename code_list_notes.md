@@ -481,6 +481,8 @@ void moveZeroes(vector<int> &nums)
 
 #### 27. 移除元素
 
+https://leetcode.cn/problems/remove-element/description/
+
 令`val=0`，则变为283. 移动零，但本题不要求k之后的元素的值，283要求后续元素为0。
 
 
@@ -571,6 +573,8 @@ public:
 
 #### 26. 删除排序数组中的重复项
 
+https://leetcode.cn/problems/remove-duplicates-from-sorted-array/
+
 **题目描述：**给你一个 **非严格递增排列** 的数组 `nums` ，请你**原地**删除重复出现的元素，使每个元素 **只出现一次** ，返回删除后数组的新长度。==元素的 **相对顺序** 应该保持 **一致** 。==然后返回 `nums` 中唯一元素的个数。
 
 考虑 `nums` 的唯一元素的数量为 `k` ，你需要做以下事情确保你的题解可以被通过：
@@ -647,6 +651,8 @@ public:
 
 
 #### 80. 删除排序数组中的重复项II
+
+https://leetcode.cn/problems/remove-duplicates-from-sorted-array-ii/description/
 
 **题目描述：**给你一个有序数组 `nums` ，请你**原地** 删除重复出现的元素，使得出现次数超过两次的元素**只出现两次** ，返回删除后数组的新长度。
 
@@ -725,6 +731,363 @@ public:
             }
         }
         return min(stack_size, n);
+    }
+};
+```
+
+
+
+## 11. 盛水最多的容器
+
+https://leetcode.cn/problems/container-with-most-water/
+
+### 1. 题目描述
+
+给定一个长度为 `n` 的整数数组 `height` 。有 `n` 条垂线，第 `i` 条线的两个端点是 `(i, 0)` 和 `(i, height[i])` 。
+
+找出其中的两条线，使得它们与 `x` 轴共同构成的容器可以容纳最多的水。
+
+返回容器可以储存的最大水量。
+
+**说明：**你不能倾斜容器。
+
+**示例 1：**
+
+<img src="code_list_notes.assets/11-container-with-most-water-fig1.png" alt="image-20250203160418532" style="zoom:50%;" />
+
+```
+输入：[1,8,6,2,5,4,8,3,7]
+输出：49 
+```
+
+**示例 2：**
+
+```
+输入：height = [1,1]
+输出：1
+```
+
+**提示：**
+
+- `n == height.length`
+- `2 <= n <= 10^5`
+- `0 <= height[i] <= 10^4`
+
+### 2. 思路
+
+> 我们left++和right--都是为了尝试取到更多的水，如果短的板不动的话，取到的水永远不会比上次多。
+>
+> 能盛多少水由短板决定，抛弃最黑暗的自己，才能有未来
+
+
+
+相向双指针，取水量为min(left,right)*(right-left)，每次移动矮的指针。
+
+
+
+### 3. 易错点
+
+思路
+
+### 4. 题解
+
+1）双指针
+
+```cpp
+class Solution {
+public:
+    int maxArea(vector<int>& height) {
+        /*
+        思路：双指针
+        Time: O(N), Space: O(1)
+        */
+        int ans = 0;
+        int left = 0, right = height.size() - 1;
+        while (left < right) {
+            // 计算当前储水量，和历史最大值比较，大则更新
+            ans = max(ans, (right - left) * min(height[left], height[right]));
+            // 移动短板
+            if (height[left] <= height[right])
+                left++;
+            else
+                right--;
+        }
+        return ans;
+    }
+};
+```
+
+2）
+
+
+
+## 15. 三数之和
+
+https://leetcode.cn/problems/3sum/
+
+
+
+### 1. 题目描述
+
+给你一个整数数组 `nums` ，判断是否存在三元组 `[nums[i], nums[j], nums[k]]` 满足 `i != j`、`i != k` 且 `j != k` ，同时还满足 `nums[i] + nums[j] + nums[k] == 0` 。请你返回所有和为 `0` 且==不重复==的三元组。
+
+**注意：**答案中不可以包含重复的三元组。
+
+
+
+**示例 1：**
+
+```
+输入：nums = [-1,0,1,2,-1,-4]
+输出：[[-1,-1,2],[-1,0,1]]
+解释：
+nums[0] + nums[1] + nums[2] = (-1) + 0 + 1 = 0 。
+nums[1] + nums[2] + nums[4] = 0 + 1 + (-1) = 0 。
+nums[0] + nums[3] + nums[4] = (-1) + 2 + (-1) = 0 。
+不同的三元组是 [-1,0,1] 和 [-1,-1,2] 。
+注意，输出的顺序和三元组的顺序并不重要。
+```
+
+**示例 2：**
+
+```
+输入：nums = [0,1,1]
+输出：[]
+解释：唯一可能的三元组和不为 0 。
+```
+
+**示例 3：**
+
+```
+输入：nums = [0,0,0]
+输出：[[0,0,0]]
+解释：唯一可能的三元组和为 0 。
+```
+
+**提示：**
+
+- `3 <= nums.length <= 3000`
+- `-10^5 <= nums[i] <= 10^5`
+
+
+
+### 2. 思路
+
+「==不重复==」的本质是什么？我们保持三重循环的大框架不变，只需要保证：
+
+- 第二重循环枚举到的元素**不小于**当前第一重循环枚举到的元素；
+
+- 第三重循环枚举到的元素**不小于**当前第二重循环枚举到的元素。
+
+
+也就是说，我们枚举的三元组 (a,b,c) 满足 a≤b≤c，保证了只有 (a,b,c) 这个顺序会被枚举到，而 (b,a,c)、(c,b,a) 等等这些不会，这样就减少了重复。要实现这一点，我们可以将数组中的元素从小到大进行**排序**，随后使用普通的三重循环就可以满足上面的要求。
+
+同时，对于每一重循环而言，相邻两次枚举的元素不能相同，否则也会造成重复。
+
+从小到大枚举 *b*，**同时**从大到小枚举 *c*，即**第二重循环和第三重循环实际上是并列的关系**。
+
+1）排序+双指针：
+
+Time: O(N^2), Space:O(1)
+
+### 3. 易错点
+
+去重！！！
+
+### 4. 题解
+
+1）排序+双指针
+
+```cpp
+class Solution {
+public:
+    vector<vector<int>> threeSum(vector<int>& nums) {
+        if (nums.size() <= 2)
+            return {};
+        vector<vector<int>> ans;
+        // 1. 排序
+        sort(nums.begin(), nums.end());
+        // 2. 进行遍历
+        for (int i = 0; i < nums.size() - 2; i++) {
+            // 3. 重复元素跳过
+            if (i > 0 && nums[i] == nums[i - 1])
+                continue;
+            // 4. 使用相向双指针
+            int left = i + 1, right = nums.size() - 1;
+            int target = -nums[i];
+            // 5. 循环条件：左右指针未相遇
+            while (left < right) {
+                int sum = nums[left] + nums[right];
+                // 6. 找到符合条件的，添加到ans
+                // 7. 左指针、右指针移动，同时【判断重复】！
+                if (sum == target) {
+                    ans.push_back({nums[i], nums[left], nums[right]});
+                    left++;
+                    right--;
+                    while (left < right && nums[left] == nums[left - 1])
+                        left++;
+                    while (left < right && nums[right] == nums[right + 1])
+                        right--;
+                }
+                // 8. 不符合要求，判断移动哪个指针
+                else if (sum < target) {
+                    left++;
+                } else
+                    right--;
+            }
+        }
+        return ans;
+    }
+};
+```
+
+2）优化版
+
+```cpp
+class Solution {
+public:
+    vector<vector<int>> threeSum(vector<int>& nums) {
+        ranges::sort(nums);
+        vector<vector<int>> ans;
+        int n = nums.size();
+        for (int i = 0; i < n - 2; i++) {
+            int x = nums[i];
+            if (i && x == nums[i - 1]) continue; // 跳过重复数字
+            if (x + nums[i + 1] + nums[i + 2] > 0) break; // 优化一
+            if (x + nums[n - 2] + nums[n - 1] < 0) continue; // 优化二
+            int j = i + 1, k = n - 1;
+            while (j < k) {
+                int s = x + nums[j] + nums[k];
+                if (s > 0) {
+                    k--;
+                } else if (s < 0) {
+                    j++;
+                } else { // 三数之和为 0
+                    ans.push_back({x, nums[j], nums[k]});
+                    for (j++; j < k && nums[j] == nums[j - 1]; j++); // 跳过重复数字
+                    for (k--; k > j && nums[k] == nums[k + 1]; k--); // 跳过重复数字
+                }
+            }
+        }
+        return ans;
+    }
+};
+```
+
+
+
+
+
+## 42. 接雨水
+
+https://leetcode.cn/problems/trapping-rain-water/description/
+
+### 1. 题目描述
+
+题目描述：给定 `n` 个非负整数表示每个宽度为 `1` 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。
+
+**示例 1：**
+
+<img src="code_list_notes.assets/42-trapping-rain-water-fig1.png" alt="image-20250203165743369" style="zoom:50%;" />
+
+```
+输入：height = [0,1,0,2,1,0,1,3,2,1,2,1]
+输出：6
+解释：上面是由数组 [0,1,0,2,1,0,1,3,2,1,2,1] 表示的高度图，在这种情况下，可以接 6 个单位的雨水（蓝色部分表示雨水）。 
+```
+
+**示例 2：**
+
+```
+输入：height = [4,2,0,3,2,5]
+输出：9
+```
+
+**提示：**
+
+- `n == height.length`
+- `1 <= n <= 2 * 10^4`
+- `0 <= height[i] <= 10^5`
+
+
+
+### 2. 思路
+
+1）DP：三次遍历，第一次正向遍历记录每个位置左侧的最大值，第二次反向遍历记录每个位置右侧的最大值，第三次进行储水量的计算。
+
+2）双指针：由于数组 *leftMax* 是从左往右计算，数组 *rightMax* 是从右往左计算，因此可以使用双指针和两个变量代替两个数组。
+
+### 3. 易错点
+
+1）DP：注意边界情况
+
+2）双指针：
+
+### 4. 题解
+
+1）动态规划
+
+```cpp
+int trap(vector<int> &height)
+{
+    /* 动态规划DP Time: O(N) Space: O(N)*/
+    /*
+        核心：每一个位置的雨水量怎么求。注意每一次遍历的区间取值范围。
+        思路：三次遍历，
+            1. 第一次找每一个位置左侧最大的高度
+            2. 第二次找每一个位置右侧最大的高度
+            3. 第三次根据当前高度、左侧高度、右侧高度计算出该位置能存放的最大雨水量
+    */
+
+    // 左侧最大高度记录，注意特殊位置处理
+    vector<int> leftmax(height.size());
+    leftmax[0] = height[0];
+    // 右侧最大高度记录，注意特殊位置处理
+    vector<int> rightmax(height.size());
+    rightmax[height.size() - 1] = height[height.size() - 1];
+
+    int sumrain = 0; // 记录雨水总量
+    // 1 遍历，记录左侧最大高度
+    for (int i = 1; i < height.size(); i++)
+        leftmax[i] = max(leftmax[i - 1], height[i]);
+    // 2 遍历，记录右侧最大高度
+    for (int i = height.size() - 2; i >= 0; i--)
+        rightmax[i] = max(rightmax[i + 1], height[i]);
+    // 3 遍历，求每个位置的最大雨水量
+    for (int i = 0; i < height.size(); i++)
+    {
+        int currain = min(leftmax[i], rightmax[i]) - height[i];
+        sumrain += currain;
+    }
+    return sumrain;
+}
+```
+
+2）双指针
+
+```cpp
+class Solution {
+public:
+    int trap(vector<int>& height) {
+        int ans = 0;
+        // 左右指针
+        int left = 0, right = height.size() - 1;
+        // 记录左侧最大值与右侧最大值
+        int leftmax = 0, rightmax = 0;
+        while (left < right) {
+            // 计算左指针和右指针对应位置两侧的最高值
+            leftmax = max(leftmax, height[left]);
+            rightmax = max(rightmax, height[right]);
+            // 移动短板，记录该位置的储水量
+            if (leftmax <= rightmax) {
+                ans += leftmax - height[left];
+                left++;
+            } else {
+                ans += rightmax - height[right];
+                right--;
+            }
+        }
+        return ans;
     }
 };
 ```
