@@ -1,8 +1,8 @@
 [toc]
 
-## 模板
+## no. 模板
 
-[XX](XX)
+[no. XX](httpXXXXXXXXXXXXXX)
 
 ### 1. 题目描述
 
@@ -89,9 +89,15 @@ Time: O(N), Space:O(N)
 
 ### 3. 易错点
 
-1）注意审题，返回的是索引下标。
+1）注意审题，返回的是索引下标，不是元素值。
 
 2）要先查找，后插入。
+
+3）注意使用的库函数是什么：find()。
+
+4）find()的是target-nums[i]，不是nums[i]。
+
+5）for循环需要有i，不要auto。
 
 ### 4. 题解
 
@@ -125,11 +131,16 @@ public:
         Time: O(N), Space:O(N)
         */
         unordered_map<int, int> dic;
+        // 1. 遍历数组，查找符合要求的元素对
         for (int i = 0; i < nums.size(); i++) {
+            // 2. 查找与当前元素配对的元素是否在哈希表中
             auto it = dic.find(target - nums[i]);
+            // 3. 不在，则将当前元素加入到哈希表中
             if (it == dic.end()) {
                 dic[nums[i]] = i;
-            } else {
+            } 
+            // 4. 配对元素存在，则返回下标
+            else {
                 return {i, it->second};
             }
         }
@@ -207,13 +218,14 @@ public:
         */
         unordered_map<string, vector<string>> dic;
         for (auto str : strs) {
-            // 先对所有的字符串进行排序
+            // 1. 先对所有的字符串进行排序
             string sort_str = str;
             sort(sort_str.begin(), sort_str.end());
-            // 并将其存储到对应的哈希表键值对中
+            // 2. 并将其存储到对应的哈希表键值对中
             dic[sort_str].push_back(str);
         }
         vector<vector<string>> ans;
+        // 3. 将所有的value给ans
         for (auto item : dic) {
             ans.push_back(item.second);
             // 注意是value，不是ans.push_back(item);
@@ -301,7 +313,7 @@ public:
 
 ### 4. 题解
 
-1）哈希集合
+1）哈希集合--cyq写的一坨
 
 ```cpp
 class Solution {
@@ -361,6 +373,358 @@ public:
             ans = max(ans, y - x); // 从 x 到 y-1 一共 y-x 个数
         }
         return ans;
+    }
+};
+```
+
+
+
+# 二、双指针
+
+## 283. 移动零
+
+[283. 移动零](https://leetcode.cn/problems/move-zeroes/)
+
+### 1. 题目描述
+
+给定一个数组 `nums`，编写一个函数将所有 `0` 移动到数组的末尾，同时==保持非零元素的相对顺序。==
+
+**请注意** ，必须在不复制数组的情况下原地对数组进行操作。
+
+**示例 1:**
+
+```
+输入: nums = [0,1,0,3,12]
+输出: [1,3,12,0,0]
+```
+
+**示例 2:**
+
+```
+输入: nums = [0]
+输出: [0]
+```
+
+ **提示**:
+
+- `1 <= nums.length <= 10^4`
+- `-2^31 <= nums[i] <= 2^31 - 1`
+
+**进阶：**你能尽量减少完成的操作次数吗？
+
+### 2. 思路
+
+使用**同向的**双指针，左指针指向当前已经处理好的序列的尾部，右指针指向待处理序列的头部。
+
+右指针不断向右移动，每次右指针指向==非零数==，则将左右指针对应的数交换，同时左指针右移。
+
+注意到以下性质：
+
+- 左指针左边均为非零数；
+
+
+- 右指针左边直到左指针处均为零。
+
+
+因此每次交换，都是将左指针的零与右指针的非零数交换，且非零数的相对顺序并未改变。
+
+### 3. 易错点
+
+
+
+### 4. 题解
+
+1）双指针+交换
+
+```cpp
+class Solution {
+public:
+    void moveZeroes(vector<int>& nums) {
+        int left = 0, right = 0;
+        while (right < nums.size()) {
+            if (nums[right] != 0) {
+                swap(nums[left], nums[right]);
+                left++;
+            }
+            right++;
+        }
+    }
+};
+```
+
+2）双指针+覆盖+末尾重新覆盖0
+
+```cpp
+void moveZeroes(vector<int> &nums)
+{
+    int slow = 0;
+    int fast = 0;
+    while (fast < nums.size())
+    {
+        if (nums[fast] != 0)
+        {
+            nums[slow] = nums[fast];
+            slow++;
+            fast++;
+        }
+        else
+            fast++;
+    }
+    while (slow < nums.size())
+        nums[slow++] = 0;
+}
+```
+
+
+
+### 5. 延申
+
+#### 27. 移除元素
+
+令`val=0`，则变为283. 移动零，但本题不要求k之后的元素的值，283要求后续元素为0。
+
+
+
+**题目描述：**给你一个数组 `nums` 和一个值 `val`，你需要**原地**移除所有数值等于 `val` 的元素。==元素的顺序可能发生改变。==然后返回 `nums` 中与 `val` 不同的元素的数量。
+
+假设 `nums` 中不等于 `val` 的元素数量为 `k`，要通过此题，您需要执行以下操作：
+
+- 更改 `nums` 数组，使 `nums` 的前 `k` 个元素包含不等于 `val` 的元素。==`nums` 的其余元素和 `nums` 的大小并不重要。==
+- 返回 `k`。
+
+
+
+**思路：**
+
+1）同向双指针
+
+2）相向双指针：如果要移除的元素恰好在数组的开头，例如序列 [1,2,3,4,5]，当 *val* 为 1 时，我们需要把每一个元素都左移一位。【注意边界判断】
+
+3）通解：如果当前元素 x 与移除元素 val 相同，那么跳过该元素。
+如果当前元素 x 与移除元素 val 不同，那么我们将其放到下标 idx 的位置，并让 idx 自增右移。【感觉本质上还是同向双指针】
+
+
+
+**题解：**
+
+1）同向双指针
+
+```cpp
+class Solution {
+public:
+    int removeElement(vector<int>& nums, int val) {
+        /*
+        思路1：同向双指针，Time: O(N), Space: O(1)
+        */
+        int left = 0, right = 0;
+        while (right < nums.size()) {
+            if (nums[right] != val) {
+                nums[left] = nums[right];
+                left++;
+            }
+            right++;
+        }
+        return left;
+    }
+};
+```
+
+2）相向双指针
+
+```cpp
+class Solution {
+public:
+    int removeElement(vector<int>& nums, int val) {
+        int left = 0, right = nums.size() - 1;
+        while (left <= right) {
+            if (nums[left] != val)
+                left++;
+            else if (nums[left] == val) {
+                nums[left] = nums[right];
+                right--;
+            }
+        }
+        return left;
+    }
+};
+```
+
+3）通解
+
+```cpp
+class Solution {
+public:
+    int removeElement(vector<int>& nums, int val) {
+        int index = 0;
+        for (auto num : nums) {
+            if (num != val) {
+                nums[index] = num;
+                index++;
+            }
+        }
+        return index;
+    }
+};
+```
+
+
+
+#### 26. 删除排序数组中的重复项
+
+**题目描述：**给你一个 **非严格递增排列** 的数组 `nums` ，请你**原地**删除重复出现的元素，使每个元素 **只出现一次** ，返回删除后数组的新长度。==元素的 **相对顺序** 应该保持 **一致** 。==然后返回 `nums` 中唯一元素的个数。
+
+考虑 `nums` 的唯一元素的数量为 `k` ，你需要做以下事情确保你的题解可以被通过：
+
+- 更改数组 `nums` ，使 `nums` 的前 `k` 个元素包含唯一元素，并按照它们最初在 `nums` 中出现的顺序排列。`nums` 的其余元素与 `nums` 的大小不重要。
+- 返回 `k` 。
+
+**思路：**
+
+1）同向双指针：
+
+双指针，left指向上一次【处理好】的位置，right去查找后续元素。由于是非严格递增排列，所以nums[left]<=nums[right]，right指向第一个出现的重复元素时，left指向的元素是小于right的，而将该元素赋给left后，重复元素又与该元素值相同，right++。
+
+2）通解：
+
+为了让解法更具有一般性，我们将原问题的「最多保留 1 位」修改为「最多保留 k 位」。由于是保留 k 个相同数字，对于前 k 个数字，我们可以直接保留。对于后面的任意数字，能够保留的前提是：与当前写入的位置前面的第 k 个元素进行比较，不相同则保留。
+
+
+
+题解：
+
+1）双指针
+
+```cpp
+class Solution {
+public:
+    int removeDuplicates(vector<int>& nums) {
+        /*
+        思路：双指针，left指向上一次【处理好】的位置，right去查找后续元素
+        由于是非严格递增排列，所以nums[left]<=nums[right]
+        right指向第一个出现的重复元素时，left指向的元素是小于right的
+        而将该元素赋给left后，重复元素又与该元素值相同，right++
+        Time: O(N), Space: O(1)
+        */
+        int left = 0, right = 1;
+        if (nums.size() == 0)
+            return 0;
+        while (right < nums.size()) {
+            if (nums[left] != nums[right]) {
+                // 注意先++，后赋值
+                left++;
+                nums[left] = nums[right];
+            }
+            right++;
+        }
+        return left + 1;
+    }
+};
+```
+
+2）通解
+
+```cpp
+class Solution {
+public:
+    int removeDuplicates(vector<int>& nums) {
+        return process(nums,1);
+    }
+    // 注意是引用类型的
+    int process(vector<int>& nums,int k){
+        int idx = 0;
+        for(auto x : nums){
+            // 前k个直接保留
+            // 后续元素需要保证和前面第k个不相同
+            if(idx < k or nums[idx - k] != x){
+                nums[idx++] = x;
+            }
+        }
+        return idx;  
+    }
+};
+```
+
+
+
+#### 80. 删除排序数组中的重复项II
+
+**题目描述：**给你一个有序数组 `nums` ，请你**原地** 删除重复出现的元素，使得出现次数超过两次的元素**只出现两次** ，返回删除后数组的新长度。
+
+不要使用额外的数组空间，你必须在**原地** 并在使用 O(1) 额外空间的条件下完成。
+
+思路：
+
+1）双指针：定义快慢指针left和right，left表示存放下一个元素的位置，right指向当前需要处理的元素。将nums[right]和nums[left-2]进行比较，不同则赋值。
+
+2）通用解：和双指针思想类似，将nums[right]和nums[left-k]进行比较。
+
+3）栈：和上述两种方法思路类似。
+
+
+
+题解：
+
+1）双指针
+
+```cpp
+class Solution {
+public:
+    int removeDuplicates(vector<int>& nums) {
+        // 当前元素个数小于2，则符合题意，直接返回长度
+        if (nums.size() <= 2)
+            return nums.size();
+        // 元素个数多余2，则利用快慢指针进行判断
+        int left = 2, right = 2;
+        while (right < nums.size()) {
+            // 右指针元素与当前处理好的倒数第二个元素不同，则保存
+            if (nums[right] != nums[left - 2]) {
+                nums[left] = nums[right];
+                left++;
+            }
+            right++;
+        }
+        return left;
+    }
+};
+```
+
+2）通用解法
+
+```cpp
+class Solution {
+public:
+    int removeDuplicates(vector<int>& nums) {
+        return process(nums,2);
+    }
+    // 注意是引用类型的
+    int process(vector<int>& nums,int k){
+        int idx = 0;
+        for(auto x : nums){
+            // 前k个直接保留
+            // 后续元素需要保证和前面第k个不相同
+            if(idx < k or nums[idx - k] != x){
+                nums[idx++] = x;
+            }
+        }
+        return idx;  
+    }
+};
+```
+
+3）栈的思想
+
+```cpp
+class Solution {
+public:
+    int removeDuplicates(vector<int>& nums) {
+        int n = nums.size();
+        int stack_size = 2; // 栈的大小，前两个元素默认保留
+        for (int i = 2; i < n; i++) {
+            if (nums[i] != nums[stack_size - 2]) { // 和栈顶下方的元素比较
+                nums[stack_size++] = nums[i]; // 入栈
+            }
+        }
+        return min(stack_size, n);
     }
 };
 ```
