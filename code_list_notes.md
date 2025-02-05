@@ -416,7 +416,7 @@ public:
 
 使用**同向的**双指针，左指针指向当前已经处理好的序列的尾部，右指针指向待处理序列的头部。
 
-右指针不断向右移动，每次右指针指向==非零数==，则将左右指针对应的数交换，同时左指针右移。
+右指针不断向右移动，每次**右指针指向==非零数==**，则将左右指针对应的数交换，同时左指针右移。
 
 注意到以下性质：
 
@@ -498,11 +498,21 @@ https://leetcode.cn/problems/remove-element/description/
 
 **思路：**
 
-1）同向双指针
+1）同向双指针：
 
-2）相向双指针：如果要移除的元素恰好在数组的开头，例如序列 [1,2,3,4,5]，当 *val* 为 1 时，我们需要把每一个元素都左移一位。【注意边界判断】
+右指针 right 指向当前将要处理的元素，左指针 left 指向下一个将要赋值的位置。如果右指针指向的元素不等于 val，它一定是输出数组的一个元素，我们就将右指针指向的元素复制到左指针位置，然后将左右指针同时右移；如果右指针指向的元素等于 val，它不能在输出数组里，此时左指针不动，右指针右移一位。
 
-3）通解：如果当前元素 x 与移除元素 val 相同，那么跳过该元素。
+2）相向双指针：
+
+如果要移除的元素恰好在数组的开头，例如序列 [1,2,3,4,5]，当 *val* 为 1 时，我们需要把每一个元素都左移一位。【注意边界判断】
+
+如果左指针 left 指向的元素等于 val，此时将右指针 right 指向的元素复制到左指针 left 的位置，然后右指针 right 左移一位。如果赋值过来的元素恰好也等于 val，可以继续把右指针 right 指向的元素的值赋值过来（左指针 left 指向的等于 val 的元素的位置继续被覆盖），直到左指针指向的元素的值不等于 val 为止。
+
+
+
+3）通解：
+
+如果当前元素 x 与移除元素 val 相同，那么跳过该元素。
 如果当前元素 x 与移除元素 val 不同，那么我们将其放到下标 idx 的位置，并让 idx 自增右移。【感觉本质上还是同向双指针】
 
 
@@ -590,7 +600,7 @@ https://leetcode.cn/problems/remove-duplicates-from-sorted-array/
 
 2）通解：
 
-为了让解法更具有一般性，我们将原问题的「最多保留 1 位」修改为「最多保留 k 位」。由于是保留 k 个相同数字，对于前 k 个数字，我们可以直接保留。对于后面的任意数字，能够保留的前提是：与当前写入的位置前面的第 k 个元素进行比较，不相同则保留。
+为了让解法更具有一般性，我们将原问题的「最多保留 1 位」修改为「最多保留 k 位」。由于是保留 k 个相同数字，对于前 k 个数字，我们可以直接保留。对于后面的任意数字，能够保留的前提是：与当前写入的位置前面的第 k 个元素进行比较，不相同则保留。【注意判断条件：index < k || nums[index - k] != num】
 
 
 
@@ -609,20 +619,19 @@ public:
         而将该元素赋给left后，重复元素又与该元素值相同，right++
         Time: O(N), Space: O(1)
         */
-        int left = 0, right = 1;
-        if (nums.size() == 0)
-            return 0;
+    int removeDuplicates(vector<int>& nums) {
+        int left = 1, right = 1;
         while (right < nums.size()) {
-            if (nums[left] != nums[right]) {
-                // 注意先++，后赋值
-                left++;
+            if (nums[right] != nums[left - 1]) {
                 nums[left] = nums[right];
+                left++;
             }
             right++;
         }
-        return left + 1;
+        return left;
     }
 };
+
 ```
 
 2）通解
@@ -787,7 +796,9 @@ https://leetcode.cn/problems/container-with-most-water/
 
 ### 3. 易错点
 
-思路
+思路。
+
+注意left和right是表示index的指针，不是表示height的。
 
 ### 4. 题解
 
@@ -893,6 +904,8 @@ Time: O(N^2), Space:O(1)
 ### 3. 易错点
 
 去重！！！
+
+重复元素跳过的判定条件！！
 
 ### 4. 题解
 
@@ -1085,6 +1098,243 @@ public:
             } else {
                 ans += rightmax - height[right];
                 right--;
+            }
+        }
+        return ans;
+    }
+};
+```
+
+
+
+# 三、滑动窗口
+
+## 3. 无重复字符的最长子串
+
+https://leetcode.cn/problems/longest-substring-without-repeating-characters/
+
+### 1. 题目描述
+
+给定一个字符串 `s` ，请你找出其中不含有重复字符的 **最长子串** 的长度。
+
+**示例 1:**
+
+```
+输入: s = "abcabcbb"
+输出: 3 
+解释: 因为无重复字符的最长子串是 "abc"，所以其长度为 3。
+```
+
+**示例 2:**
+
+```
+输入: s = "bbbbb"
+输出: 1
+解释: 因为无重复字符的最长子串是 "b"，所以其长度为 1。
+```
+
+**示例 3:**
+
+```
+输入: s = "pwwkew"
+输出: 3
+解释: 因为无重复字符的最长子串是 "wke"，所以其长度为 3。
+     请注意，你的答案必须是 子串 的长度，"pwke" 是一个子序列，不是子串。
+```
+
+ **提示：**
+
+- `0 <= s.length <= 5 * 10^4`
+- `s` 由英文字母、数字、符号和空格组成
+
+
+
+### 2. 思路
+
+1）哈希集合+滑动窗口
+
+用哈希集合记录窗口中的元素，当窗口将要添加的元素已经在窗口中出现过时，则将窗口左侧元素移除，直至新加入的元素不在窗口中。将新元素加入窗口，比较长度。
+
+2）哈希表+滑动窗口
+
+哈希表作为计数器，记录滑动窗口内出现的元素以及次数。当要加入到窗口中的元素的计数＞1时，不符合要求，则将窗口左侧元素移除，直至窗口中只包含该元素的个数为1。比较maxlen。
+
+### 3. 易错点
+
+
+
+
+
+### 4. 题解
+
+1）哈希集合+滑动窗口
+
+```cpp
+class Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+        /*
+        思路：哈希集合+滑动窗口
+        Time:O(N), Space: O(N)
+        */
+        unordered_set<char> window;
+        int left = 0, right = 0;
+        int maxlen = 0;
+        for (; right < s.length(); right++) {
+            char c = s[right];
+            // 如果窗口内已经包含 c，再加入 c 会导致窗口内有重复元素
+            // 所以要在加入 c 之前，先移出窗口内的 c
+            while (window.contains(c)) {
+                window.erase(s[left]);
+                left++;
+            }
+            window.insert(c);
+            maxlen = max(maxlen, right - left + 1);
+        }
+        return maxlen;
+    }
+};
+```
+
+2）哈希表+滑动窗口
+
+```cpp
+class Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+        int n = s.length(), ans = 0, left = 0;
+        unordered_map<char, int> cnt; // 维护从下标 left 到下标 right 的字符
+        for (int right = 0; right < n; right++) {
+            char c = s[right];
+            cnt[c]++;
+            while (cnt[c] > 1) { // 窗口内有重复字母
+                cnt[s[left]]--; // 移除窗口左端点字母
+                left++; // 缩小窗口
+            }
+            ans = max(ans, right - left + 1); // 更新窗口长度最大值
+        }
+        return ans;
+    }
+};
+```
+
+
+
+## 438. 找到字符串中所有字母异位词
+
+https://leetcode.cn/problems/find-all-anagrams-in-a-string/
+
+### 1. 题目描述
+
+给定两个字符串 `s` 和 `p`，找到 `s` 中所有 `p` 的 **异位词** 的子串，返回这些子串的起始索引。不考虑答案输出的顺序。
+
+**示例 1:**
+
+```
+输入: s = "cbaebabacd", p = "abc"
+输出: [0,6]
+解释:
+起始索引等于 0 的子串是 "cba", 它是 "abc" 的异位词。
+起始索引等于 6 的子串是 "bac", 它是 "abc" 的异位词。
+```
+
+ **示例 2:**
+
+```
+输入: s = "abab", p = "ab"
+输出: [0,1,2]
+解释:
+起始索引等于 0 的子串是 "ab", 它是 "ab" 的异位词。
+起始索引等于 1 的子串是 "ba", 它是 "ab" 的异位词。
+起始索引等于 2 的子串是 "ab", 它是 "ab" 的异位词。
+```
+
+ **提示:**
+
+- `1 <= s.length, p.length <= 3 * 10^4`
+- `s` 和 `p` 仅包含小写字母
+
+
+
+### 2. 思路
+
+1）定长滑动窗口
+
+枚举 $s$ 所有长度与 $p$ 相同的字串 $s'$，比较 $s'$ 与 $p$ 中每个字母出现的次数是否相同。
+
+- 时间复杂度：O(∣Σ∣*m*+*n*)，其中 *m* 是 *s* 的长度，*n* 是 *p* 的长度，∣Σ∣=26 是字符集合的大小。
+- 空间复杂度：O(∣Σ∣)。返回值不计入。
+
+
+
+2）不定长滑动窗口
+
+枚举子串 $s'$ 的右端点，如果 $s'$ 中某个字母出现次数**大于** $p$ 中字母出现的次数，则右移 $s'$ 的左端点。
+
+如果发现 $s'$  的==长度等于== $p$ 的长度，则说明 $s'$  的每种字母的出现次数和 $p$ 的每种字母的出现次数都相同（如果出现次数 $s'$  的小于 $p$ 的，不可能长度一样），那么 $s'$ 是 $p$ 的异位词。
+
+对于 $p$ 的字母 $c$，把 `cnt[c]` 加一。对于 $s'$  的字母 $c$，把 `cnt[c]` 减一。如果 `cnt[c]<0`，说明窗口中的字母 c 的个数比 p 的多，右移左端点。
+
+- 时间复杂度：O(m+n)，其中 m 是 s 的长度，n 是 p 的长度。虽然写了个二重循环，但是内层循环中对 left 加一的总执行次数不会超过 m 次，所以滑窗的时间复杂度为 O(m)。
+- 空间复杂度：O(∣Σ∣)，其中 ∣Σ∣=26 是字符集合的大小。返回值不计入。
+
+
+
+### 3. 易错点
+
+
+
+### 4. 题解
+
+1）定长滑动窗口
+
+```cpp
+class Solution {
+public:
+    vector<int> findAnagrams(string s, string p) {
+        vector<int> ans;
+        array<int, 26> cnt_p{}; // 统计 p 的每种字母的出现次数
+        array<int, 26> cnt_s{}; // 统计 s 的长为 p.length() 的子串 s' 的每种字母的出现次数
+        for (char c : p) {
+            cnt_p[c - 'a']++;
+        }
+        for (int right = 0; right < s.length(); right++) {
+            cnt_s[s[right] - 'a']++; // 右端点字母进入窗口
+            int left = right - p.length() + 1;
+            if (left < 0) { // 窗口长度不足 p.length()
+                continue;
+            }
+            if (cnt_s == cnt_p) { // s' 和 p 的每种字母的出现次数都相同
+                ans.push_back(left); // s' 左端点下标加入答案
+            }
+            cnt_s[s[left] - 'a']--; // 左端点字母离开窗口
+        }
+        return ans;
+    }
+};
+```
+
+2）不定长滑动窗口
+
+```cpp
+class Solution {
+public:
+    vector<int> findAnagrams(string s, string p) {
+        vector<int> ans;
+        int cnt[26]{}; // 统计 p 的每种字母的出现次数
+        for (char c : p) {
+            cnt[c - 'a']++;
+        }
+        int left = 0;
+        for (int right = 0; right < s.size(); right++) {
+            int c = s[right] - 'a';
+            cnt[c]--; // 右端点字母进入窗口
+            while (cnt[c] < 0) { // 字母 c 太多了
+                cnt[s[left] - 'a']++; // 左端点字母离开窗口
+                left++; 
+            }
+            if (right - left + 1 == p.length()) { // s' 和 p 的每种字母的出现次数都相同
+                ans.push_back(left); // s' 左端点下标加入答案
             }
         }
         return ans;
