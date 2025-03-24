@@ -3454,14 +3454,19 @@ class Solution {
 
 ```java
 public class Solution {
-    public boolean hasCycle(ListNode head) {
+    public ListNode detectCycle(ListNode head) {
+
         Set<ListNode> visited = new HashSet<ListNode>();
         while (head != null) {
-            if (!visited.add(head))
+            if (visited.contains(head))
                 return true;
-            head = head.next;
+            else {
+                visited.add(head);
+                head = head.next;
+            }
         }
         return false;
+
     }
 }
 ```
@@ -3566,6 +3571,8 @@ public class Solution {
 **2）快慢指针**
 
 思路。
+
+判定条件：==fast!=null==&& fast.next != null。
 
 ### 4. 题解
 
@@ -3674,9 +3681,11 @@ public class Solution {
 
 新增节点之后，cur也要后移。
 
+跳出循环后，要处理剩余的节点。
+
 **2）递归**
 
-
+递归结束条件。递归过程。
 
 ### 4. 题解
 
@@ -3775,7 +3784,11 @@ class Solution {
 
 **2）迭代**
 
-初始化答案为一个「空链表」，每次循环，向该链表末尾添加一个节点（保存一个数位）。循环即遍历链表 l1 和 l2 ，每次把两个节点值 l1.val, l2.val 与进位值 carry 相加，除以 10 的余数即为当前节点需要保存的数位，除以 10 的商即为新的进位值。
+初始化答案为一个「空链表」，每次循环，向该链表末尾添加一个节点（保存一个数位）。
+
+当l1、l2、carry中有一个还有值没处理，则继续求解。
+
+循环即遍历链表 l1 和 l2 ，每次把两个节点值 l1.val, l2.val 与进位值 carry 相加，除以 10 的余数即为当前节点需要保存的数位，除以 10 的商即为新的进位值。
 
 需要注意的是，在第一次循环时，我们无法往一个空节点的末尾添加节点。这里的技巧是，创建一个哨兵节点（dummy node），当成初始的「空链表」。循环结束后，哨兵节点的下一个节点就是最终要返回的链表头节点。
 
@@ -3785,13 +3798,17 @@ class Solution {
 
 **1）递归**
 
+递归终止条件。
+
 注意判断短的链表是否为空。
+
+三目运算符优先级问题。
 
 **2）迭代**
 
 迭代条件。
 
-
+cur新增一位数值后要后移。
 
 ### 4. 题解
 
@@ -3900,6 +3917,8 @@ class Solution {
 
 设置dummy哨兵节点，快慢指针同时从dummy出发。快指针先走n步。之后当当fast.next不为空时，两个指针同时前进。快指针走到头时，慢指针恰好在倒数第n个节点的前一个。删掉倒数第n个节点。
 
+时间复杂度：O(N)，空间复杂度：O(1)
+
 ### 3. 易错点
 
 ### 4. 题解
@@ -3964,7 +3983,7 @@ class Solution {
 
 ### 2. 思路
 
-1）迭代
+**1）迭代**
 
 先设置哨兵节点dummy，便于操作。
 
@@ -3972,7 +3991,9 @@ class Solution {
 
 0-1-2-3变成0-2-1-3，然后n0跑去n1的位置，n1跑去n3的位置，以此循环往复。
 
-2）递归
+时间复杂度：O(N)，空间复杂度：O(1)
+
+**2）递归**
 
 返回条件：<=1个节点。
 
@@ -3982,7 +4003,17 @@ n1.next后接n3，n3需要递归。
 
 n2.next=n1，返回n2。
 
+时间复杂度：O(N)，空间复杂度：O(N)
+
 ### 3. 易错点
+
+1）迭代
+
+节点连接更新的顺序：从头到尾。
+
+指针去新的位置：从头到尾。
+
+2）
 
 ### 4. 题解
 
@@ -4067,6 +4098,8 @@ class Solution {
 
 ### 2. 思路
 
+时间复杂度：O(N)，空间复杂度：O(1)
+
 先遍历链表，统计节点数量。
 
 k个一组，依次进行翻转。
@@ -4116,6 +4149,684 @@ class Solution {
         return dummy.next;
     }
 }
+```
+
+
+
+## 138. 随机链表的复制
+
+[138. 随机链表的复制](https://leetcode.cn/problems/copy-list-with-random-pointer/)
+
+### 1. 题目描述
+
+给你一个长度为 `n` 的链表，每个节点包含一个额外增加的随机指针 `random` ，该指针可以指向链表中的任何节点或空节点。
+
+构造这个链表的 **[深拷贝](https://baike.baidu.com/item/深拷贝/22785317?fr=aladdin)**。 深拷贝应该正好由 `n` 个 **全新** 节点组成，其中每个新节点的值都设为其对应的原节点的值。新节点的 `next` 指针和 `random` 指针也都应指向复制链表中的新节点，并使原链表和复制链表中的这些指针能够表示相同的链表状态。**复制链表中的指针都不应指向原链表中的节点** 。
+
+例如，如果原链表中有 `X` 和 `Y` 两个节点，其中 `X.random --> Y` 。那么在复制链表中对应的两个节点 `x` 和 `y` ，同样有 `x.random --> y` 。
+
+返回复制链表的头节点。
+
+用一个由 `n` 个节点组成的链表来表示输入/输出中的链表。每个节点用一个 `[val, random_index]` 表示：
+
+- `val`：一个表示 `Node.val` 的整数。
+- `random_index`：随机指针指向的节点索引（范围从 `0` 到 `n-1`）；如果不指向任何节点，则为 `null` 。
+
+你的代码 **只** 接受原链表的头节点 `head` 作为传入参数。
+
+ **示例 1：**
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/01/09/e1.png)
+
+```
+输入：head = [[7,null],[13,0],[11,4],[10,2],[1,0]]
+输出：[[7,null],[13,0],[11,4],[10,2],[1,0]]
+```
+
+**示例 2：**
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/01/09/e2.png)
+
+```
+输入：head = [[1,1],[2,1]]
+输出：[[1,1],[2,1]]
+```
+
+**示例 3：**
+
+**![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/01/09/e3.png)**
+
+```
+输入：head = [[3,null],[3,0],[3,null]]
+输出：[[3,null],[3,0],[3,null]]
+```
+
+ **提示：**
+
+- `0 <= n <= 1000`
+- `-104 <= Node.val <= 104`
+- `Node.random` 为 `null` 或指向链表中的节点。
+
+### 2. 思路
+
+**1）哈希表**
+
+遍历链表，创建新的节点，并一一赋值。利用哈希表记录旧链表节点与新链表节点的映射关系。
+
+遍历链表，用哈希表查找原链表节点的next和random在新链表中的映射，处理新链表的指针。
+
+时间复杂度：O(N)，空间复杂度：O(N)
+
+**2）拼接**
+
+**复制各节点，构建拼接链表**：设原链表为$ node1→node2→⋯$ ，构建的拼接链表如下所示：$node1→node1_{new}→node2→node2_{new}→⋯$
+
+**构建新链表各节点的 random 指向**：当访问原节点 cur 的随机指向节点 cur.random 时，对应新节点 cur.next 的随机指向节点为 cur.random.next 。
+
+**拆分原 / 新链表**：设置 pre / cur 分别指向原 / 新链表头节点，遍历执行 pre.next = pre.next.next 和 cur.next = cur.next.next 将两链表拆分开。
+
+返回新链表的头节点 res 即可。
+
+时间复杂度：O(N)，空间复杂度：O(1)
+
+### 3. 易错点
+
+**1）哈希表**
+
+
+
+**2）拼接**
+
+需要额外的指针记录结果。
+
+拆分链表时的判定条件。
+
+拆分链表之后next的变化。
+
+单独处理结果的尾节点为空。
+
+### 4. 题解
+
+1）哈希表
+
+```java
+class Solution {
+    public Node copyRandomList(Node head) {
+        if(head == null) return null;
+        Node cur = head;
+        Map<Node, Node> map = new HashMap<>();
+        // 3. 复制各节点，并建立 “原节点 -> 新节点” 的 Map 映射
+        while(cur != null) {
+            map.put(cur, new Node(cur.val));
+            cur = cur.next;
+        }
+        cur = head;
+        // 4. 构建新链表的 next 和 random 指向
+        while(cur != null) {
+            map.get(cur).next = map.get(cur.next);
+            map.get(cur).random = map.get(cur.random);
+            cur = cur.next;
+        }
+        // 5. 返回新链表的头节点
+        return map.get(head);
+    }
+}
+```
+
+2）拼接
+
+```java
+class Solution {
+    public Node copyRandomList(Node head) {
+        if(head == null) return null;
+        Node cur = head;
+        // 1. 复制各节点，并构建拼接链表
+        while(cur != null) {
+            Node tmp = new Node(cur.val);
+            tmp.next = cur.next;
+            cur.next = tmp;
+            cur = tmp.next;
+        }
+        // 2. 构建各新节点的 random 指向
+        cur = head;
+        while(cur != null) {
+            if(cur.random != null)
+                cur.next.random = cur.random.next;
+            cur = cur.next.next;
+        }
+        // 3. 拆分两链表
+        cur = head.next;
+        Node pre = head, res = head.next;
+        while(cur.next != null) {
+            pre.next = pre.next.next;
+            cur.next = cur.next.next;
+            pre = pre.next;
+            cur = cur.next;
+        }
+        pre.next = null; // 单独处理原链表尾节点
+        return res;      // 返回新链表头节点
+    }
+}
+
+作者：Krahets
+链接：https://leetcode.cn/problems/copy-list-with-random-pointer/solutions/2361362/138-fu-zhi-dai-sui-ji-zhi-zhen-de-lian-b-6jeo/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+
+
+
+## 148. 排序链表
+
+[148. 排序链表](https://leetcode.cn/problems/sort-list/)
+
+### 1. 题目描述
+
+给你链表的头结点 `head` ，请将其按 **升序** 排列并返回 **排序后的链表** 。
+
+ **示例 1：**
+
+![img](https://assets.leetcode.com/uploads/2020/09/14/sort_list_1.jpg)
+
+```
+输入：head = [4,2,1,3]
+输出：[1,2,3,4]
+```
+
+**示例 2：**
+
+![img](https://assets.leetcode.com/uploads/2020/09/14/sort_list_2.jpg)
+
+```
+输入：head = [-1,5,3,4,0]
+输出：[-1,0,3,4,5]
+```
+
+**示例 3：**
+
+```
+输入：head = []
+输出：[]
+```
+
+ **提示：**
+
+- 链表中节点的数目在范围 `[0, 5 * 10^4]` 内
+- `-10^5 <= Node.val <= 10^5`
+
+ **进阶：**你可以在 `O(n log n)` 时间复杂度和常数级空间复杂度下，对链表进行排序吗？
+
+### 2. 思路
+
+**1）归并排序（自顶向下 分治 递归）**
+
+1. 找到链表的中间结点，将链表一分为二，slow作为的前一个链表的尾节点，并断开slow与其后一个节点的连接。
+2. 分治，递归调用 sortList，分别排序left（只有前一半）和 right。
+3. 排序后，我们得到了两个有序链表，那么合并两个有序链表，得到排序后的链表，返回链表头节点。
+
+时间复杂度：O(nlogn)，空间复杂度：O(logn)
+
+**2）归并排序（自底向上 迭代）**
+
+1. 遍历链表，获取链表长度 length。
+2. 初始化步长 step=1。
+3. 循环直到 step≥length。
+4. 每轮循环，从链表头节点开始。
+5. 分割出两段长为 step 的链表，合并，把合并后的链表插到新链表的末尾。重复该步骤，直到链表遍历完毕。
+6. 把 step 扩大一倍。回到第 4 步。
+
+时间复杂度：O(nlogn)，空间复杂度：O(1)
+
+### 3. 易错点
+
+**1）递归**
+
+找中间节点的过程，找完要断开。
+
+**2）迭代**
+
+分割链表时找长度为size的链表，要判断cur!=null才能有cur=cur.next。
+
+如何分割链表。
+
+### 4. 题解
+
+**1）自顶向下**
+
+```java
+class Solution {
+    // 876. 链表的中间结点（快慢指针）
+    // 奇数个节点找到中点，偶数个节点找到中心【左边】的节点
+    private ListNode middleNode(ListNode head) {
+        ListNode fast = head.next;
+        ListNode slow = head;
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        ListNode newHead = slow.next;
+        // 断开前后链表的链接，slow相当于前半个链表的尾节点
+        slow.next = null;
+        return newHead;
+    }
+
+    // 21. 合并两个有序链表（双指针）
+    private ListNode mergeList(ListNode left, ListNode right) {
+        ListNode dummy = new ListNode();
+        ListNode cur = dummy;
+        while (left != null && right != null) {
+            if (left.val < right.val) {
+                cur.next = left;
+                left = left.next;
+            } else {
+                cur.next = right;
+                right = right.next;
+            }
+            cur = cur.next;
+        }
+        cur.next = left != null ? left : right;
+        return dummy.next;
+    }
+
+    public ListNode sortList(ListNode head) {
+        // 如果链表为空或只有一个节点，不需要排序
+        if (head == null || head.next == null)
+            return head;
+        // 找到中间节点，并断开与其前一个节点的连接
+        ListNode newHead = middleNode(head);
+        ListNode left = sortList(head);
+        ListNode right = sortList(newHead);
+        return mergeList(left, right);
+
+    }
+}
+```
+
+**2）自底向上**
+
+```java
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ * int val;
+ * ListNode next;
+ * ListNode() {}
+ * ListNode(int val) { this.val = val; }
+ * ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ * }
+ */
+class Solution {
+    // 计算链表长度
+    private int getListLength(ListNode head) {
+        int cnt = 0;
+        for (ListNode cur = head; cur != null; cur = cur.next)
+            cnt++;
+        return cnt;
+    }
+
+    // 分割链表，以head为头节点，分割出长度为size的链表，返回下一个链表的头
+    private ListNode spiltList(ListNode head, int size) {
+        ListNode cur = head;
+        for (int i = 0; i < size - 1 && cur != null; i++)
+            cur = cur.next;
+        if (cur == null || cur.next == null)
+            return null;
+        ListNode newHead = cur.next;
+        cur.next = null;
+        return newHead;
+    }
+
+    // 21. 合并两个有序链表（双指针）
+    // 返回合并后的链表的头节点和尾节点
+    private ListNode[] mergeTwoLists(ListNode list1, ListNode list2) {
+        ListNode dummy = new ListNode();
+        ListNode cur = dummy;
+        while (list1 != null && list2 != null) {
+            if (list1.val < list2.val) {
+                cur.next = list1;
+                list1 = list1.next;
+            } else {
+                cur.next = list2;
+                list2 = list2.next;
+            }
+            cur = cur.next;
+        }
+        // 拼接剩余链表
+        cur.next = list1 != null ? list1 : list2;
+        while (cur.next != null)
+            cur = cur.next;
+        // 循环结束后，cur 是合并后的链表的尾节点
+        return new ListNode[] { dummy.next, cur };
+    }
+
+    public ListNode sortList(ListNode head) {
+        // 1. 计算链表长度
+        int length = getListLength(head);
+        ListNode dummy = new ListNode(0, head);
+        // 2. 每次归并排序长度为step的链表
+        for (int step = 1; step < length; step *= 2) {
+            // 新链表的末尾
+            ListNode newListTail = dummy;
+            // 每轮循环的起始节点
+            ListNode cur = dummy.next;
+            while (cur != null) {
+                // 3. 从 cur 开始，分割出两段长为 step 的链表，头节点分别为 head1 和 head2
+                ListNode head1 = cur;
+                ListNode head2 = spiltList(head1, step);
+                cur = spiltList(head2, step);// 下一轮循环的起始节点
+                // 4. 合并两段长为 step 的链表，返回新链表的头节点和尾节点
+                ListNode[] merged = mergeTwoLists(head1, head2);
+                // 5. 合并后的头节点 merged[0]，插到 newListTail 的后面
+                newListTail.next = merged[0];
+                // merged[1] 现在是新链表的末尾
+                newListTail = merged[1];
+            }
+        }
+        return dummy.next;
+    }
+}
+```
+
+
+
+## 23. 合并K个升序链表
+
+[23. 合并 K 个升序链表](https://leetcode.cn/problems/merge-k-sorted-lists/)
+
+### 1. 题目描述
+
+给你一个链表数组，每个链表都已经按升序排列。
+
+请你将所有链表合并到一个升序链表中，返回合并后的链表。
+
+**示例 1：**
+
+```
+输入：lists = [[1,4,5],[1,3,4],[2,6]]
+输出：[1,1,2,3,4,4,5,6]
+解释：链表数组如下：
+[
+  1->4->5,
+  1->3->4,
+  2->6
+]
+将它们合并到一个有序链表中得到。
+1->1->2->3->4->4->5->6
+```
+
+**示例 2：**
+
+```
+输入：lists = []
+输出：[]
+```
+
+**示例 3：**
+
+```
+输入：lists = [[]]
+输出：[]
+```
+
+**提示：**
+
+- `k == lists.length`
+- `0 <= k <= 10^4`
+- `0 <= lists[i].length <= 500`
+- `-10^4 <= lists[i][j] <= 10^4`
+- `lists[i]` 按 **升序** 排列
+- `lists[i].length` 的总和不超过 `10^4`
+
+### 2. 思路
+
+**1）最小堆**
+
+将所有链表的头节点加入到最小堆中。每次从中选取最小的节点加入到结果链表中。如果该节点仍有后续节点，则将其后继节点加入到堆中。
+
+时间复杂度：O(nlogk)，空间复杂度：O(k)
+
+**2）分治**
+
+类似于148排序链表。
+
+把 lists 一分为二（尽量**均分**），先合并前一半的链表，再合并后一半的链表，然后把这两个链表合并成最终的链表。
+
+时间复杂度：O(nlogn)，空间复杂度：O(logk)
+
+### 3. 易错点
+
+1）最小堆
+
+
+
+2）分治
+
+左闭右开区间。
+
+### 4. 题解
+
+**1）最小堆**
+
+```java
+class Solution {
+    public ListNode mergeKLists(ListNode[] lists) {
+        PriorityQueue<ListNode> pq = new PriorityQueue<>((a, b) -> a.val - b.val);
+        // 把所有非空链表的头节点入堆
+        for (ListNode head : lists) {
+            if (head != null)
+                pq.offer(head);
+        }
+        ListNode dummy = new ListNode();
+        ListNode cur = dummy;
+        // 循环直到堆为空
+        while (!pq.isEmpty()) {
+            // 从堆中取出最小节点（当前所有链表头的最小值）
+            ListNode node = pq.poll();
+            // 取出节点后，将其后继节点（若有）加入堆
+            if (node.next != null) {
+                pq.offer(node.next);
+            }
+            // 连接节点到结果链表
+            cur.next = node;
+            cur = cur.next;
+        }
+        return dummy.next;
+    }
+}
+```
+
+**2）分治**
+
+```java
+class Solution {
+    public ListNode mergeKLists(ListNode[] lists) {
+        return mergeKLists(lists, 0, lists.length);
+    }
+
+    // 合并从 lists[i] 到 lists[j-1] 的链表
+    private ListNode mergeKLists(ListNode[] lists, int i, int j) {
+        int m = j - i;
+        if (m == 0)
+            return null;
+        if (m == 1)
+            return lists[i];
+        // 将当前链表范围一分为二：左半 [i, i+m/2)，右半 [i+m/2, j)
+        // 合并左半部分
+        ListNode left = mergeKLists(lists, i, i + m / 2);
+        // 合并右半部分
+        ListNode right = mergeKLists(lists, i + m / 2, j);
+        return mergeTwoLists(left, right);
+    }
+
+    // 21. 合并两个有序链表
+    private ListNode mergeTwoLists(ListNode list1, ListNode list2) {
+        ListNode dummy = new ListNode();
+        ListNode cur = dummy;
+        while (list1 != null && list2 != null) {
+            if (list1.val <= list2.val) {
+                cur.next = list1;
+                list1 = list1.next;
+            } else {
+                cur.next = list2;
+                list2 = list2.next;
+            }
+            cur = cur.next;
+        }
+        cur.next = list1 != null ? list1 : list2;
+        return dummy.next;
+    }
+}
+```
+
+
+
+## 146. LRU缓存
+
+[146. LRU 缓存](https://leetcode.cn/problems/lru-cache/)
+
+### 1. 题目描述
+
+请你设计并实现一个满足 [LRU (最近最少使用) 缓存](https://baike.baidu.com/item/LRU) 约束的数据结构。
+
+实现 `LRUCache` 类：
+
+- `LRUCache(int capacity)` 以 **正整数** 作为容量 `capacity` 初始化 LRU 缓存
+- `int get(int key)` 如果关键字 `key` 存在于缓存中，则返回关键字的值，否则返回 `-1` 。
+- `void put(int key, int value)` 如果关键字 `key` 已经存在，则变更其数据值 `value` ；如果不存在，则向缓存中插入该组 `key-value` 。如果插入操作导致关键字数量超过 `capacity` ，则应该 **逐出** 最久未使用的关键字。
+
+函数 `get` 和 `put` 必须以 `O(1)` 的平均时间复杂度运行。
+
+**示例：**
+
+```
+输入
+["LRUCache", "put", "put", "get", "put", "get", "put", "get", "get", "get"]
+[[2], [1, 1], [2, 2], [1], [3, 3], [2], [4, 4], [1], [3], [4]]
+输出
+[null, null, null, 1, null, -1, null, -1, 3, 4]
+
+解释
+LRUCache lRUCache = new LRUCache(2);
+lRUCache.put(1, 1); // 缓存是 {1=1}
+lRUCache.put(2, 2); // 缓存是 {1=1, 2=2}
+lRUCache.get(1);    // 返回 1
+lRUCache.put(3, 3); // 该操作会使得关键字 2 作废，缓存是 {1=1, 3=3}
+lRUCache.get(2);    // 返回 -1 (未找到)
+lRUCache.put(4, 4); // 该操作会使得关键字 1 作废，缓存是 {4=4, 3=3}
+lRUCache.get(1);    // 返回 -1 (未找到)
+lRUCache.get(3);    // 返回 3
+lRUCache.get(4);    // 返回 4
+```
+
+ **提示：**
+
+- `1 <= capacity <= 3000`
+- `0 <= key <= 10000`
+- `0 <= value <= 10^5`
+- 最多调用 `2 * 10^5` 次 `get` 和 `put`
+
+### 2. 思路
+
+**1）双向链表+哈希表**
+
+双向链表维护使用顺序，哈希表提供快速访问。
+
+**双向链表**允许在已知节点位置时，以 `O(1)` 时间删除该节点并插入头部。
+
+缓存满时，直接删除链表尾节点（最久未使用）即可，时间复杂度 `O(1)`。
+
+**哈希表**存储键到链表节点的映射，实现 `O(1)` 时间查找节点。
+
+
+
+### 3. 易错点
+
+
+
+### 4. 题解
+
+1）
+
+```java
+class LRUCache {
+    private static class Node {
+        int key, value;
+        Node prev, next;
+
+        Node(int k, int v) {
+            key = k;
+            value = v;
+        }
+    }
+
+    private final int capacity;
+    private final Node dummy = new Node(0, 0);
+    private final Map<Integer, Node> keyToNode = new HashMap<>();
+
+    public LRUCache(int capacity) {
+        this.capacity = capacity;
+        dummy.prev = dummy;
+        dummy.next = dummy;
+    }
+
+    public int get(int key) {
+        Node node = getNode(key);
+        return node != null ? node.value : -1;
+    }
+
+    public void put(int key, int value) {
+        Node node = getNode(key);
+        // 存在键为key的节点
+        if (node != null) {
+            // 更新value
+            node.value = value;
+            return;
+        }
+        // 不存在，新建一个节点
+        node = new Node(key, value);
+        // 将该节点放到LRU缓存中
+        keyToNode.put(key, node);
+        pushFront(node);
+        // 如果加入该节点后超过容量，则去掉最后面的
+        if (keyToNode.size() > capacity) {
+            Node backNode = dummy.prev;
+            keyToNode.remove(backNode.key);
+            remove(backNode);
+        }
+    }
+
+    private Node getNode(int key) {
+        // 不存在该节点
+        if (!keyToNode.containsKey(key)) {
+            return null;
+        }
+        // 存在该节点
+        Node node = keyToNode.get(key);
+        // 将该节点从LRU中取出来，并放到最前面
+        remove(node);
+        pushFront(node);
+        return node;
+    }
+
+    private void remove(Node node) {
+        node.prev.next = node.next;
+        node.next.prev = node.prev;
+    }
+
+    private void pushFront(Node node) {
+        node.prev = dummy;
+        node.next = dummy.next;
+        node.prev.next = node;
+        node.next.prev = node;
+    }
+}
+
+/**
+ * Your LRUCache object will be instantiated and called as such:
+ * LRUCache obj = new LRUCache(capacity);
+ * int param_1 = obj.get(key);
+ * obj.put(key,value);
+ */
 ```
 
 
@@ -4751,6 +5462,14 @@ public:
 ### 1. 题目描述
 
 ### 2. 思路
+
+1）
+
+时间复杂度：O(nlogn)，空间复杂度：O(logn)
+
+2）
+
+时间复杂度：O(nlogn)，空间复杂度：O(logn)
 
 ### 3. 易错点
 
